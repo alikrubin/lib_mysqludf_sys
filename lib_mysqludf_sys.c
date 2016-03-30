@@ -422,5 +422,63 @@ char* sys_eval(
 	return result;
 }
 
+my_bool make_toast_init(
+        UDF_INIT *initid
+,       UDF_ARGS *args
+,       char *message
+){
+        unsigned int i=0;
+        if(args->arg_count == 1
+        && args->arg_type[i]==STRING_RESULT){
+                return 0;
+        } else {
+                strcpy(
+                        message
+                ,       "Please enter the number of seconds to toast as a string ..."
+                );
+                return 1;
+        }
+}
+void make_toast_deinit(
+        UDF_INIT *initid
+){
+}
+char* make_toast(
+        UDF_INIT *initid
+,       UDF_ARGS *args
+,       char* result
+,       unsigned long* length
+,       char *is_null
+,       char *error
+){
+        FILE *pipe;
+        char line[1024];
+        unsigned long outlen, linelen;
+	char buf[40];
+
+        result = malloc(1);
+        outlen = 0;
+	sprintf(buf, "make_toast %s", args->args[0]);
+
+        pipe = popen(buf, "r");
+
+        while (fgets(line, sizeof(line), pipe) != NULL) {
+                linelen = strlen(line);
+                result = realloc(result, outlen + linelen);
+                strncpy(result + outlen, line, linelen);
+                outlen = outlen + linelen;
+        }
+
+        pclose(pipe);
+
+        if (!(*result) || result == NULL) {
+                *is_null = 1;
+        } else {
+                result[outlen] = 0x00;
+                *length = strlen(result);
+        }
+
+        return result;
+}
 
 #endif /* HAVE_DLOPEN */
