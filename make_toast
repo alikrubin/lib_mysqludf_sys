@@ -1,0 +1,24 @@
+#!/usr/bin/python
+import sys
+from time import sleep
+
+if len(sys.argv) == 2 and sys.argv[1].isdigit():
+        toast_time = sys.argv[1]
+else:
+        toast_time = 10
+
+print "Toasting for " + str(toast_time) + " seconds..."
+
+from time import sleep
+import pifacedigitalio as p
+try:
+	p.init()
+	p.digital_write(7,1)
+	sleep(float(toast_time))
+	p.digital_write(7,0)
+except (KeyboardInterrupt, SystemExit):
+        print "Exiting and turning off heat..."
+	p.digital_write(7,0)
+        sys.exit(1)
+
+print "Your toast is ready! Enjoy! "
